@@ -1,0 +1,41 @@
+---
+networks:
+  app_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.90.0/27
+          gateway: 192.168.90.1
+
+volumes:
+  postgres-data: {}
+  redis-data: {}
+
+services:
+  db:
+    image: "postgres:12.0-alpine"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      app_net: {}
+    env_file:
+      - ./.env
+
+  portal:
+    image: "fleamarket:dev"
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: /app/manage.py runserver 0.0.0.0:8080
+    env_file:
+      - ./.env
+    networks:
+      app_net:
+        ipv4_address: 192.168.90.10
+    volumes:
+    - ./backend:/app
+    ports:
+    - 8080:8080
+    depends_on:
+      - db

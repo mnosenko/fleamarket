@@ -1,0 +1,20 @@
+FROM python:3.9 as prepare_requirements
+WORKDIR /app
+COPY Pipfile* ./
+RUN python -m pip install --upgrade pipenv --no-cache-dir
+RUN pipenv lock -r > requirements.txt
+
+FROM python:3.9
+ENV SECRET_KEY 'django-insecure-a0us3n_u1)pik%4^vyh%7*hdgtf)df#!ak5tw^u4iqibxe4urq'
+ENV POSTGRES_HOST_AUTH_METHOD true
+ENV POSTGRES_PASSWORD P@ssw0rdQwerty
+ENV POSTGRES_USER fleamarket
+ENV POSTGRES_DB fleamarket
+ENV POSTGRES_HOST db
+ENV DATABASE_TYPE postgres
+ENV SQLITE_DB_PATH /tmp/db.sqlite3
+ENV DJANGO_SETTINGS_MODULE fleamarket.settings
+COPY --from=prepare_requirements /app/requirements.txt /requirements.txt
+RUN python -m pip install -r /requirements.txt
+WORKDIR /app
+EXPOSE 8080

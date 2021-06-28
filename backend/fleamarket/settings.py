@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -73,12 +73,23 @@ WSGI_APPLICATION = 'fleamarket.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
+DATABASE_BY_TYPE = {
+    'sqlite': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.environ.get('SQLITE_DB_PATH', BASE_DIR / 'db.sqlite3'),
+    },
+    'postgres': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ.get('POSTGRES_DB', 'fleamarket'),
+        'USER': os.environ.get('POSTGRES_USER', 'fleamarket'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'fleamarket'),
+        'HOST': os.environ.get('POSTGRES_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('POSTGRES_PORT', 5432),
+        'CONN_MAX_AGE': 300
     }
+}
+DATABASES = {
+    'default': DATABASE_BY_TYPE.get(os.environ.get('DATABASE_TYPE', 'sqlite'))
 }
 
 
